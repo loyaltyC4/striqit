@@ -1,73 +1,71 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
   --font-sans: var(--font-inter);
   --font-serif: var(--font-fraunces);
 }
 
+/* Dark theme as default (matches Replit source exactly) */
 :root {
-  /* Editorial light theme */
-  --background: hsl(40 20% 97%);
-  --foreground: hsl(0 0% 9%);
-  --card: hsl(40 15% 93%);
-  --card-foreground: hsl(0 0% 9%);
-  --primary: hsl(33 63% 60%);
-  --primary-foreground: hsl(0 0% 9%);
-  --secondary: hsl(40 10% 88%);
-  --secondary-foreground: hsl(0 0% 9%);
-  --muted: hsl(40 10% 88%);
-  --muted-foreground: hsl(0 0% 45%);
-  --accent: hsl(40 10% 88%);
-  --accent-foreground: hsl(0 0% 9%);
-  --destructive: hsl(0 72% 51%);
-  --border: hsl(0 0% 85%);
-  --input: hsl(0 0% 85%);
-  --ring: hsl(33 63% 60%);
+  --background: 0 0% 4%;
+  --foreground: 0 0% 96%;
+
+  --border: 0 0% 12%;
+  --card: 0 0% 6%;
+  --card-foreground: 0 0% 96%;
+
+  --primary: 33 63% 60%;
+  --primary-foreground: 0 0% 4%;
+
+  --secondary: 0 0% 12%;
+  --secondary-foreground: 0 0% 96%;
+
+  --muted: 0 0% 12%;
+  --muted-foreground: 0 0% 60%;
+
+  --accent: 0 0% 12%;
+  --accent-foreground: 0 0% 96%;
+
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+
+  --input: 0 0% 12%;
+  --ring: 0 0% 80%;
+
+  --app-font-sans: var(--font-inter), 'Inter', sans-serif;
+  --app-font-serif: var(--font-fraunces), 'Fraunces', serif;
+  --radius: 0rem;
 }
 
-/* Dashboard retains the dark theme via data attribute */
-[data-theme="dark"] {
-  --background: hsl(0 0% 4%);
-  --foreground: hsl(0 0% 96%);
-  --card: hsl(0 0% 7%);
-  --card-foreground: hsl(0 0% 96%);
-  --primary: hsl(24 95% 43%);
-  --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(0 0% 13%);
-  --secondary-foreground: hsl(0 0% 96%);
-  --muted: hsl(0 0% 13%);
-  --muted-foreground: hsl(0 0% 50%);
-  --accent: hsl(0 0% 15%);
-  --accent-foreground: hsl(0 0% 96%);
-  --destructive: hsl(0 63% 55%);
-  --border: hsl(0 0% 15%);
-  --input: hsl(0 0% 15%);
-  --ring: hsl(24 95% 43%);
-}
-
-* { box-sizing: border-box; border-color: var(--border); }
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-inter), sans-serif;
-  font-feature-settings: "rlig" 1, "calt" 1;
-}
-.font-serif {
-  font-family: var(--font-fraunces), serif;
+@layer base {
+  * {
+    box-sizing: border-box;
+    border-color: hsl(var(--border));
+  }
+  body {
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: var(--app-font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  .font-serif {
+    font-family: var(--app-font-serif);
+  }
 }
