@@ -1,214 +1,332 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Flame, Search, Shield, Zap, Eye, Loader2 } from "lucide-react"
+import Image from "next/image"
 
-export default function HomePage() {
-  const [username, setUsername] = useState("")
-  const [detecting, setDetecting] = useState(false)
-  const router = useRouter()
+/* ─── tiny fade-in hook ─────────────────────────────────────────── */
+function useFadeIn(threshold = 0.15) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [visible, setVisible] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); obs.disconnect() } },
+      { threshold }
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [threshold])
+  return { ref, visible }
+}
 
-  async function handleDetect(e: React.FormEvent) {
-    e.preventDefault()
-    if (!username.trim()) return
-    setDetecting(true)
-    // Simulate a brief scan animation, then go to auth with the username
-    await new Promise(r => setTimeout(r, 1400))
-    router.push(`/auth?username=${encodeURIComponent(username.trim())}&mode=signup`)
-  }
+function FadeIn({
+  children,
+  delay = 0,
+  className = "",
+}: {
+  children: React.ReactNode
+  delay?: number
+  className?: string
+}) {
+  const { ref, visible } = useFadeIn()
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(28px)",
+        transition: `opacity 0.8s cubic-bezier(0.16,1,0.3,1) ${delay}s, transform 0.8s cubic-bezier(0.16,1,0.3,1) ${delay}s`,
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
+/* ─── navigation ────────────────────────────────────────────────── */
+function Navigation() {
+  const [scrolled, setScrolled] = useState(false)
+  useEffect(() => {
+    const h = () => setScrolled(window.scrollY > 50)
+    window.addEventListener("scroll", h)
+    return () => window.removeEventListener("scroll", h)
+  }, [])
 
   return (
-    <div className="min-h-screen bg-[#080808] text-white flex flex-col">
-
-      {/* Nav */}
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-white/5">
-        <div className="flex items-center gap-2">
-          <Flame className="h-5 w-5 text-orange-500" />
-          <span className="font-bold tracking-tight">TakedownDesk</span>
+    <nav
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 50,
+        transition: "all 0.5s",
+        padding: scrolled ? "1rem 0" : "1.5rem 0",
+        background: scrolled ? "hsl(40 20% 97% / 0.85)" : "transparent",
+        backdropFilter: scrolled ? "blur(12px)" : "none",
+        borderBottom: scrolled ? "1px solid hsl(0 0% 85% / 0.5)" : "1px solid transparent",
+      }}
+    >
+      <div className="max-w-7xl mx-auto px-6 md:px-12 flex justify-between items-center">
+        <div className="font-serif text-xl tracking-tight text-foreground font-medium">
+          Takedown Desk
         </div>
-        <div className="flex items-center gap-6 text-sm text-white/50">
-          <a href="#how" className="hover:text-white transition-colors">How it works</a>
-          <a href="/auth" className="hover:text-white transition-colors">Sign in</a>
+        <div className="hidden md:flex gap-8 text-sm font-medium tracking-wide text-muted-foreground">
+          <a href="#manifesto" className="hover:text-foreground transition-colors">Manifesto</a>
+          <a href="#capabilities" className="hover:text-foreground transition-colors">Capabilities</a>
+          <a href="#architecture" className="hover:text-foreground transition-colors">Architecture</a>
+        </div>
+        <div className="flex items-center gap-4">
+          <a
+            href="/auth"
+            className="text-sm font-medium tracking-wide text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Sign in
+          </a>
           <a
             href="/auth?mode=signup"
-            className="rounded-full bg-orange-600 hover:bg-orange-500 text-white px-4 py-1.5 transition-colors"
+            className="text-sm font-medium tracking-wide border border-foreground px-5 py-2 hover:bg-foreground hover:text-background transition-all duration-300"
           >
-            Get started
+            Initiate Access
           </a>
         </div>
-      </nav>
+      </div>
+    </nav>
+  )
+}
+
+/* ─── page ──────────────────────────────────────────────────────── */
+export default function HomePage() {
+  const router = useRouter()
+
+  return (
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      <Navigation />
 
       {/* Hero */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-24 text-center">
-
-        {/* Illustration */}
-        <div className="mb-10 relative">
-          <CreatorIllustration />
+      <section className="relative min-h-screen flex items-center justify-center pt-20 px-6 md:px-12">
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <Image
+            src="/photographer.png"
+            alt="Photographer in studio"
+            fill
+            priority
+            className="object-cover object-center opacity-30"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
         </div>
-
-        <div className="inline-flex items-center gap-2 rounded-full bg-orange-500/10 border border-orange-500/20 px-4 py-1.5 text-xs text-orange-400 mb-6">
-          <span className="h-1.5 w-1.5 rounded-full bg-orange-500 animate-pulse" />
-          14,892 takedowns filed this week
+        <div className="relative z-10 max-w-4xl mx-auto text-center">
+          <FadeIn>
+            <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl leading-[1.1] tracking-tight mb-6">
+              The invisible shield behind serious work.
+            </h1>
+          </FadeIn>
+          <FadeIn delay={0.1}>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed font-light">
+              Where photographers, musicians, filmmakers, writers, and brands go when
+              they&apos;re done tolerating theft. Precision protection for creative professionals.
+            </p>
+          </FadeIn>
+          <FadeIn delay={0.2}>
+            <button
+              onClick={() => router.push("/auth?mode=signup")}
+              className="bg-foreground text-background px-8 py-4 text-sm font-medium tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-300"
+            >
+              Establish Protection
+            </button>
+          </FadeIn>
         </div>
+      </section>
 
-        <h1 className="text-5xl md:text-6xl font-bold tracking-tight max-w-3xl leading-tight">
-          They steal it.{" "}
-          <span className="text-orange-500">We burn it down.</span>
-        </h1>
-        <p className="mt-5 text-lg text-white/50 max-w-xl leading-relaxed">
-          Enter your creator username. We&apos;ll scan 200+ platforms for stolen content
-          and file DMCA takedowns automatically — first removal in under 24 hours.
-        </p>
-
-        {/* Detect form */}
-        <form
-          onSubmit={handleDetect}
-          className="mt-10 flex items-center gap-2 w-full max-w-md bg-white/5 border border-white/10 rounded-2xl p-2 focus-within:border-orange-500/40 transition-colors"
-        >
-          <div className="flex items-center gap-2 flex-1 px-3">
-            <Search className="h-4 w-4 text-white/30 shrink-0" />
-            <input
-              type="text"
-              placeholder="your username or brand name…"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              className="flex-1 bg-transparent text-sm text-white placeholder:text-white/25 outline-none"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={!username.trim() || detecting}
-            className="flex items-center gap-2 rounded-xl bg-orange-600 hover:bg-orange-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium px-5 py-2.5 transition-all"
-          >
-            {detecting ? (
-              <><Loader2 className="h-4 w-4 animate-spin" />Scanning…</>
-            ) : (
-              <><Zap className="h-4 w-4" />Detect</>
-            )}
-          </button>
-        </form>
-
-        <p className="mt-3 text-xs text-white/25">
-          Works for creators, brands, photographers, musicians, authors & more
-        </p>
-
-        {/* Account type quick-start */}
-        <div className="mt-14 flex items-center gap-4">
-          <span className="text-sm text-white/30">I&apos;m a</span>
-          <button
-            onClick={() => router.push("/auth?mode=signup&type=creator")}
-            className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 px-5 py-2 text-sm text-white/70 hover:text-white transition-all"
-          >
-            <span>🎨</span> Creator
-          </button>
-          <button
-            onClick={() => router.push("/auth?mode=signup&type=brand")}
-            className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 px-5 py-2 text-sm text-white/70 hover:text-white transition-all"
-          >
-            <span>🏢</span> Brand
-          </button>
-        </div>
-      </main>
-
-      {/* How it works */}
-      <section id="how" className="border-t border-white/5 px-8 py-20">
+      {/* Manifesto */}
+      <section id="manifesto" className="py-32 px-6 md:px-12 bg-card">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-14">
-            Three steps to <span className="text-orange-500">total protection</span>
-          </h2>
+          <FadeIn>
+            <span className="text-primary text-sm font-medium tracking-widest uppercase mb-6 block">
+              01 — The Standard
+            </span>
+          </FadeIn>
+          <FadeIn delay={0.1}>
+            <h2 className="font-serif text-3xl md:text-5xl leading-tight mb-8">
+              Not a legal service.<br />
+              Not a hacker tool.<br />
+              A precision instrument.
+            </h2>
+          </FadeIn>
+          <FadeIn delay={0.2}>
+            <p className="text-muted-foreground text-lg md:text-xl leading-relaxed font-light max-w-3xl">
+              We treat your work as your livelihood because it is. We built Takedown Desk
+              to be a quiet, uncompromising force that operates in the background while
+              you focus on what actually matters — creating.
+            </p>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* Monitoring */}
+      <section id="capabilities" className="py-32 px-6 md:px-12">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24 items-center">
+          <div className="order-2 md:order-1 relative overflow-hidden" style={{ aspectRatio: "4/5" }}>
+            <FadeIn className="h-full w-full absolute inset-0">
+              <Image src="/filmmaker.png" alt="Filmmaker on set" fill className="object-cover" />
+            </FadeIn>
+          </div>
+          <div className="order-1 md:order-2">
+            <FadeIn>
+              <span className="text-primary text-sm font-medium tracking-widest uppercase mb-6 block">
+                02 — Always Watching
+              </span>
+            </FadeIn>
+            <FadeIn delay={0.1}>
+              <h2 className="font-serif text-4xl md:text-5xl mb-6 leading-tight">
+                Omnipresent Monitoring
+              </h2>
+            </FadeIn>
+            <FadeIn delay={0.2}>
+              <p className="text-muted-foreground text-lg leading-relaxed mb-8 font-light">
+                24/7 automated sweeps across the web, social platforms, and streaming networks.
+                Advanced AI fingerprinting for images, video, audio, and written content finds
+                unauthorised use before it spreads.
+              </p>
+            </FadeIn>
+            <FadeIn delay={0.3}>
+              <ul className="space-y-4 border-t border-border pt-8">
+                {["Visual Fingerprinting", "Audio Recognition", "Text Analysis"].map((item) => (
+                  <li key={item} className="flex justify-between items-center text-sm font-medium tracking-wide">
+                    <span>{item}</span>
+                    <span className="text-muted-foreground">Active</span>
+                  </li>
+                ))}
+              </ul>
+            </FadeIn>
+          </div>
+        </div>
+      </section>
+
+      {/* Takedowns */}
+      <section className="py-32 px-6 md:px-12 bg-card">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24 items-center">
+          <div>
+            <FadeIn>
+              <span className="text-primary text-sm font-medium tracking-widest uppercase mb-6 block">
+                03 — Execution
+              </span>
+            </FadeIn>
+            <FadeIn delay={0.1}>
+              <h2 className="font-serif text-4xl md:text-5xl mb-6 leading-tight">
+                Instant Takedown Filing
+              </h2>
+            </FadeIn>
+            <FadeIn delay={0.2}>
+              <p className="text-muted-foreground text-lg leading-relaxed mb-8 font-light">
+                No legal jargon. No forms to parse. When a match is found, you receive a
+                real-time detection alert. With a single action, our agent-driven protection
+                system files and enforces the DMCA claim.
+              </p>
+            </FadeIn>
+            <FadeIn delay={0.3}>
+              <button
+                onClick={() => router.push("/auth?mode=signup")}
+                className="border-b border-foreground pb-1 text-sm font-medium tracking-wide hover:text-primary hover:border-primary transition-colors duration-300"
+              >
+                Review the Process
+              </button>
+            </FadeIn>
+          </div>
+          <div className="relative overflow-hidden" style={{ aspectRatio: "1/1" }}>
+            <FadeIn className="h-full w-full absolute inset-0">
+              <Image src="/printed-photo.png" alt="Printed photograph" fill className="object-cover" />
+            </FadeIn>
+          </div>
+        </div>
+      </section>
+
+      {/* Creator Grid */}
+      <section id="architecture" className="py-32 px-6 md:px-12">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <FadeIn>
+              <span className="text-primary text-sm font-medium tracking-widest uppercase mb-6 block">
+                04 — The Network
+              </span>
+            </FadeIn>
+            <FadeIn delay={0.1}>
+              <h2 className="font-serif text-4xl md:text-5xl mb-6 leading-tight">
+                Built for the obsessive.
+              </h2>
+            </FadeIn>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { icon: <Search className="h-5 w-5 text-orange-400" />, step: "01", title: "Detect", desc: "Enter your username. Our scanners sweep 200+ platforms for copies of your work within minutes." },
-              { icon: <Shield className="h-5 w-5 text-orange-400" />, step: "02", title: "File", desc: "We auto-generate court-ready DMCA notices and submit them on your behalf — anonymously." },
-              { icon: <Eye className="h-5 w-5 text-orange-400" />, step: "03", title: "Monitor", desc: "Get real-time alerts when new piracy is detected. We watch so you don't have to." },
-            ].map(({ icon, step, title, desc }) => (
-              <div key={step} className="relative p-6 rounded-2xl bg-white/3 border border-white/8">
-                <span className="text-xs text-white/20 font-mono">{step}</span>
-                <div className="mt-3 mb-3">{icon}</div>
-                <h3 className="font-semibold text-white mb-2">{title}</h3>
-                <p className="text-sm text-white/45 leading-relaxed">{desc}</p>
-              </div>
+              { title: "Photographers", desc: "Protecting high-res assets, editorials, and fine-art prints from unauthorised commercial use." },
+              { title: "Musicians", desc: "Securing stems, unreleased tracks, and masters from early leaks and uncredited sampling." },
+              { title: "Filmmakers", desc: "Shielding storyboards, cuts, and cinematic assets across global streaming platforms." },
+              { title: "Writers", desc: "Defending manuscripts, articles, and proprietary text against scraping and republication." },
+              { title: "Brands", desc: "Maintaining absolute control over brand identity, assets, and proprietary media." },
+              { title: "Artists", desc: "Ensuring visual creations remain credited, compensated, and correctly attributed." },
+            ].map((item, i) => (
+              <FadeIn key={item.title} delay={i * 0.08} className="border border-border p-8 hover:bg-card transition-colors duration-500 cursor-default">
+                <h3 className="font-serif text-xl mb-3">{item.title}</h3>
+                <p className="text-muted-foreground text-sm font-light leading-relaxed">{item.desc}</p>
+              </FadeIn>
             ))}
           </div>
         </div>
       </section>
 
-      <footer className="border-t border-white/5 px-8 py-6 flex items-center justify-between text-xs text-white/20">
-        <span>© 2026 TakedownDesk Inc.</span>
-        <span>They steal it. We burn it down.</span>
+      {/* Full-width image break */}
+      <section className="py-20 px-6 md:px-12">
+        <div className="max-w-7xl mx-auto">
+          <FadeIn>
+            <div className="relative w-full overflow-hidden" style={{ aspectRatio: "21/9" }}>
+              <Image
+                src="/musician.png"
+                alt="Musician in studio"
+                fill
+                className="object-cover"
+                style={{ objectPosition: "center 30%" }}
+              />
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-32 px-6 md:px-12 bg-card text-center">
+        <div className="max-w-3xl mx-auto">
+          <FadeIn>
+            <h2 className="font-serif text-5xl md:text-7xl mb-8 leading-tight">
+              Stop tolerating theft.
+            </h2>
+          </FadeIn>
+          <FadeIn delay={0.1}>
+            <p className="text-muted-foreground text-xl font-light mb-12">
+              Deploy the agent-driven protection system that runs while you create.
+            </p>
+          </FadeIn>
+          <FadeIn delay={0.2}>
+            <button
+              onClick={() => router.push("/auth?mode=signup")}
+              className="bg-foreground text-background px-10 py-5 text-sm font-medium tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-300"
+            >
+              Initiate Coverage
+            </button>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-12 px-6 md:px-12 border-t border-border flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-muted-foreground font-light">
+        <div>&copy; {new Date().getFullYear()} Takedown Desk. All rights reserved.</div>
+        <div className="flex gap-8">
+          <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
+          <a href="#" className="hover:text-foreground transition-colors">Terms of Service</a>
+          <a href="/auth" className="hover:text-foreground transition-colors">Sign In</a>
+        </div>
       </footer>
     </div>
-  )
-}
-
-function CreatorIllustration() {
-  return (
-    <svg width="280" height="180" viewBox="0 0 280 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Glow */}
-      <ellipse cx="140" cy="160" rx="80" ry="12" fill="#ea580c" fillOpacity="0.12" />
-
-      {/* Central figure — creator with device */}
-      <g transform="translate(100, 20)">
-        {/* Head */}
-        <circle cx="40" cy="22" r="16" stroke="#ffffff" strokeWidth="1.5" strokeOpacity="0.7" fill="none" />
-        {/* Body */}
-        <path d="M20 55 Q40 45 60 55 L64 100 H16 Z" stroke="#ffffff" strokeWidth="1.5" strokeOpacity="0.5" fill="#ea580c" fillOpacity="0.08" />
-        {/* Left arm holding phone */}
-        <path d="M20 65 L4 80" stroke="#ffffff" strokeWidth="1.5" strokeOpacity="0.5" strokeLinecap="round" />
-        {/* Phone */}
-        <rect x="-6" y="74" width="14" height="22" rx="2" stroke="#ea580c" strokeWidth="1.5" fill="#ea580c" fillOpacity="0.12" />
-        <line x1="-2" y1="78" x2="4" y2="78" stroke="#ea580c" strokeWidth="1" strokeOpacity="0.6" />
-        <line x1="-2" y1="82" x2="4" y2="82" stroke="#ea580c" strokeWidth="1" strokeOpacity="0.4" />
-        {/* Right arm — camera */}
-        <path d="M60 65 L76 72" stroke="#ffffff" strokeWidth="1.5" strokeOpacity="0.5" strokeLinecap="round" />
-        {/* Camera */}
-        <rect x="74" y="66" width="22" height="16" rx="2" stroke="#ffffff" strokeWidth="1.5" strokeOpacity="0.6" fill="none" />
-        <circle cx="85" cy="74" r="5" stroke="#ffffff" strokeWidth="1.2" strokeOpacity="0.5" fill="none" />
-        <circle cx="85" cy="74" r="2" fill="#ea580c" fillOpacity="0.7" />
-        {/* Legs */}
-        <path d="M28 100 L24 130" stroke="#ffffff" strokeWidth="1.5" strokeOpacity="0.4" strokeLinecap="round" />
-        <path d="M52 100 L56 130" stroke="#ffffff" strokeWidth="1.5" strokeOpacity="0.4" strokeLinecap="round" />
-      </g>
-
-      {/* Floating platform icons */}
-      {/* YouTube */}
-      <g transform="translate(20, 50)" opacity="0.5">
-        <rect width="28" height="20" rx="5" stroke="#ff4444" strokeWidth="1.2" fill="#ff4444" fillOpacity="0.1" />
-        <polygon points="11,6 11,14 19,10" fill="#ff4444" fillOpacity="0.7" />
-      </g>
-      {/* Instagram */}
-      <g transform="translate(230, 40)" opacity="0.5">
-        <rect x="0" y="0" width="24" height="24" rx="6" stroke="#c026d3" strokeWidth="1.2" fill="#c026d3" fillOpacity="0.1" />
-        <circle cx="12" cy="12" r="6" stroke="#c026d3" strokeWidth="1.2" fill="none" />
-        <circle cx="17.5" cy="6.5" r="1.5" fill="#c026d3" fillOpacity="0.7" />
-      </g>
-      {/* Spotify */}
-      <g transform="translate(240, 110)" opacity="0.4">
-        <circle cx="14" cy="14" r="13" stroke="#22c55e" strokeWidth="1.2" fill="#22c55e" fillOpacity="0.1" />
-        <path d="M8 10 Q14 7 20 10" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-        <path d="M8 14 Q14 11 19 14" stroke="#22c55e" strokeWidth="1.2" strokeLinecap="round" fill="none" />
-        <path d="M9 18 Q14 15 18 18" stroke="#22c55e" strokeWidth="1" strokeLinecap="round" fill="none" />
-      </g>
-      {/* TikTok note */}
-      <g transform="translate(10, 120)" opacity="0.4">
-        <rect width="22" height="26" rx="4" stroke="#ffffff" strokeWidth="1.2" fill="#ffffff" fillOpacity="0.05" />
-        <path d="M14 6 Q18 5 18 10 Q18 14 14 14 L14 20" stroke="#ffffff" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-        <circle cx="12" cy="21" r="2.5" stroke="#ffffff" strokeWidth="1.2" fill="none" />
-      </g>
-
-      {/* Scan lines radiating outward */}
-      <line x1="100" y1="65" x2="44" y2="60" stroke="#ea580c" strokeWidth="0.8" strokeOpacity="0.3" strokeDasharray="3 3" />
-      <line x1="180" y1="65" x2="236" y2="52" stroke="#ea580c" strokeWidth="0.8" strokeOpacity="0.3" strokeDasharray="3 3" />
-      <line x1="180" y1="85" x2="240" y2="117" stroke="#ea580c" strokeWidth="0.8" strokeOpacity="0.3" strokeDasharray="3 3" />
-      <line x1="100" y1="90" x2="26" y2="130" stroke="#ea580c" strokeWidth="0.8" strokeOpacity="0.3" strokeDasharray="3 3" />
-
-      {/* Shield badge */}
-      <g transform="translate(122, 130)">
-        <path d="M18 2 L32 8 L32 18 Q32 26 18 32 Q4 26 4 18 L4 8 Z"
-          stroke="#ea580c" strokeWidth="1.5" fill="#ea580c" fillOpacity="0.1" />
-        <path d="M11 17 L16 22 L25 13" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      </g>
-    </svg>
   )
 }

@@ -1,0 +1,8 @@
+# Exclude old static marketing site files (these are in GitHub root but not needed)
+index.html
+auth.html
+dashboard.html
+dashboard-v2.html
+footer-bg.jpg
+supabase-migration.sql
+*.html

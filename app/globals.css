@@ -17,31 +17,57 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-fraunces);
 }
 
 :root {
-  --background: #0a0a0a;
-  --foreground: #f2f2f2;
-  --card: #111111;
-  --card-foreground: #f2f2f2;
-  --primary: #ea580c;
-  --primary-foreground: #ffffff;
-  --secondary: #1f1f1f;
-  --secondary-foreground: #f2f2f2;
-  --muted: #1f1f1f;
-  --muted-foreground: #808080;
-  --accent: #262626;
-  --accent-foreground: #f2f2f2;
-  --destructive: #ef4444;
-  --border: #262626;
-  --input: #262626;
-  --ring: #ea580c;
+  /* Editorial light theme */
+  --background: hsl(40 20% 97%);
+  --foreground: hsl(0 0% 9%);
+  --card: hsl(40 15% 93%);
+  --card-foreground: hsl(0 0% 9%);
+  --primary: hsl(33 63% 60%);
+  --primary-foreground: hsl(0 0% 9%);
+  --secondary: hsl(40 10% 88%);
+  --secondary-foreground: hsl(0 0% 9%);
+  --muted: hsl(40 10% 88%);
+  --muted-foreground: hsl(0 0% 45%);
+  --accent: hsl(40 10% 88%);
+  --accent-foreground: hsl(0 0% 9%);
+  --destructive: hsl(0 72% 51%);
+  --border: hsl(0 0% 85%);
+  --input: hsl(0 0% 85%);
+  --ring: hsl(33 63% 60%);
+}
+
+/* Dashboard retains the dark theme via data attribute */
+[data-theme="dark"] {
+  --background: hsl(0 0% 4%);
+  --foreground: hsl(0 0% 96%);
+  --card: hsl(0 0% 7%);
+  --card-foreground: hsl(0 0% 96%);
+  --primary: hsl(24 95% 43%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(0 0% 13%);
+  --secondary-foreground: hsl(0 0% 96%);
+  --muted: hsl(0 0% 13%);
+  --muted-foreground: hsl(0 0% 50%);
+  --accent: hsl(0 0% 15%);
+  --accent-foreground: hsl(0 0% 96%);
+  --destructive: hsl(0 63% 55%);
+  --border: hsl(0 0% 15%);
+  --input: hsl(0 0% 15%);
+  --ring: hsl(24 95% 43%);
 }
 
 * { box-sizing: border-box; border-color: var(--border); }
 body {
   background: var(--background);
   color: var(--foreground);
+  font-family: var(--font-inter), sans-serif;
   font-feature-settings: "rlig" 1, "calt" 1;
+}
+.font-serif {
+  font-family: var(--font-fraunces), serif;
 }

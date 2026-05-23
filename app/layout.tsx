@@ -1,17 +1,27 @@
 import type { Metadata } from "next"
-import { Geist } from "next/font/google"
+import { Inter, Fraunces } from "next/font/google"
 import "./globals.css"
 
-const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin"] })
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+})
+
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+})
 
 export const metadata: Metadata = {
-  title: "TakedownDesk — Dashboard",
-  description: "Anti-piracy enforcement command centre",
+  title: "Takedown Desk | Professional Protection",
+  description: "The invisible shield behind every serious creator's work.",
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${geist.variable} h-full antialiased`}>
+    <html lang="en" className={`${inter.variable} ${fraunces.variable} h-full antialiased`}>
       <body className="h-full">{children}</body>
     </html>
   )
